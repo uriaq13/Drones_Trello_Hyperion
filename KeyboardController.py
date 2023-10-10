@@ -9,7 +9,7 @@ print(drone.get_battery())
 
 def getKeyBoardInput():
     lr, fb, up, yv = 0, 0, 0, 0
-    speed = 50
+    speed = 10
 
     if kp.getKey("LEFT"): lr = -speed
     elif kp.getKey("RIGHT"): lr = speed

@@ -1,19 +1,20 @@
 import cv2
 import numpy as np
 from djitellopy import tello
+import KeyPressModule as kp
 drone = tello.Tello()
 drone.connect()
 print(drone.get_battery())
 drone.streamon()
-drone.takeoff()
-hsvVals = [0, 0, 0, 179, 255, 85]
+
+hsvVals = [0, 0, 0, 178, 255, 87]
 sensors = 3
 threshold = 0.2
 width, height = 480, 360
 
 senstivity = 3 
-weigths = [-25, -15, 0, 15, 25]
-fSpeed = 15
+#weigths = [-25, -15, 0, 15, 25]
+fSpeed = 10
 
 curve = 0
 
@@ -56,25 +57,26 @@ def sendCommands(senOut, cx):
     lr = int(np.clip(lr, -10, 10))
     if lr < 2 and lr > -2: lr = 0
 
-    if senOut == [1, 0, 0]: curve = weigths[0]
-    elif senOut == [1, 1, 0]: curve = weigths[1]
-    elif senOut == [0, 1, 0]: curve = weigths[2]
-    elif senOut == [0, 1, 1]: curve = weigths[3]
-    elif senOut == [0, 0, 1]: curve = weigths[4]
-    elif senOut == [0, 0, 0]: curve = weigths[2]
-    elif senOut == [1, 1, 1]: curve = weigths[2]
-    elif senOut == [1, 0, 1]: curve = weigths[2]
+    # if senOut == [1, 0, 0]: curve = weigths[0]
+    # elif senOut == [1, 1, 0]: curve = weigths[1]
+    # elif senOut == [0, 1, 0]: curve = weigths[2]
+    # elif senOut == [0, 1, 1]: curve = weigths[3]
+    # elif senOut == [0, 0, 1]: curve = weigths[4]
+    # elif senOut == [0, 0, 0]: curve = weigths[2]
+    # elif senOut == [1, 1, 1]: curve = weigths[2]
+    # elif senOut == [1, 0, 1]: curve = weigths[2]
     drone.send_rc_control(lr,fSpeed,0,curve)
 while True:
     img = drone.get_frame_read().frame
     img = cv2.resize(img, (width, height))
     img = cv2.flip(img, 0)
-
+    if kp.getKey("e"): drone.takeoff()
+    if kp.getKey("q"): drone.land()
     imgThres = thresholding(img)
     cx = getContours(imgThres,img) #For translation
     senOut = getSensorOutput(imgThres, sensors) #For Rotation
     sendCommands(senOut, cx)
     cv2.imshow("Output",img)
     cv2.imshow("Output", imgThres)
-    cv2.waitKey()
+    cv2.waitKey(1)
 
